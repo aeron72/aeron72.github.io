@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aeron Flores — Software Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0D2818;
+    --bg-panel:#123420;
+    --bg-panel-2:#16402A;
+    --copper:#C17A45;
+    --copper-bright:#E6A264;
+    --silk:#EDEAE0;
+    --silk-dim:#C7CFC4;
+    --muted:#7E9789;
+    --line:#2A5238;
+    --radius:2px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg-deep);
+    color:var(--silk);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  a{color:var(--copper-bright);}
+  ::selection{background:var(--copper); color:var(--bg-deep);}
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--copper-bright);
+    outline-offset:3px;
+  }
+
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--copper-bright);
+  }
+
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+
+  /* ===== layout shell ===== */
+  .sheet{
+    max-width:960px;
+    margin:0 auto;
+    padding:0 32px;
+    position:relative;
+  }
+
+  /* PCB trace running down the left margin, connecting section pads */
+  .trace-rail{
+    position:absolute;
+    left:0;
+    top:0;
+    width:32px;
+    height:100%;
+    pointer-events:none;
+    display:none;
+  }
+  @media(min-width:860px){
+    .trace-rail{ display:block; }
+  }
+  .trace-rail svg{ position:absolute; top:0; left:-40px; }
+  .trace-line{
+    fill:none;
+    stroke:var(--copper);
+    stroke-width:2;
+    stroke-dasharray:1600;
+    stroke-dashoffset:1600;
+    transition:stroke-dashoffset 1.6s ease;
+  }
+  .trace-line.drawn{ stroke-dashoffset:0; }
+  .pad{
+    fill:var(--bg-deep);
+    stroke:var(--copper-bright);
+    stroke-width:2;
+  }
+
+  /* ===== header / nav ===== */
+  header{
+    position:sticky; top:0; z-index:20;
+    background:rgba(13,40,24,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:960px; margin:0 auto; padding:16px 32px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .nav-inner .mark{ font-family:'Space Grotesk'; font-weight:600; font-size:1.05rem; }
+  .nav-inner .mark span{ color:var(--copper-bright); }
+  nav ul{ list-style:none; display:flex; gap:28px; }
+  nav a{
+    text-decoration:none; color:var(--silk-dim);
+    font-family:'IBM Plex Mono'; font-size:0.82rem; letter-spacing:0.04em;
+  }
+  nav a:hover{ color:var(--copper-bright); }
+
+  /* ===== hero / datasheet header ===== */
+  .hero{ padding:88px 0 64px; position:relative; }
+  .part-no{
+    font-family:'IBM Plex Mono'; font-size:0.82rem; color:var(--muted);
+    border:1px solid var(--line); display:inline-block;
+    padding:5px 10px; border-radius:var(--radius); margin-bottom:22px;
+  }
+  .hero h1{
+    font-size:clamp(2.4rem, 6vw, 3.8rem);
+    line-height:1.05;
+    color:var(--silk);
+  }
+  .hero h1 em{ font-style:normal; color:var(--copper-bright); }
+  .hero p.role{
+    margin-top:14px; font-size:1.15rem; color:var(--silk-dim); max-width:560px;
+  }
+  .hero .lede{ margin-top:22px; max-width:560px; color:var(--silk-dim); }
+  .hero-cta{ margin-top:32px; display:flex; gap:14px; flex-wrap:wrap; }
+  .btn{
+    font-family:'IBM Plex Mono'; font-size:0.85rem;
+    padding:11px 18px; border-radius:var(--radius);
+    text-decoration:none; display:inline-block;
+    border:1px solid var(--copper);
+    transition:all .18s ease;
+  }
+  .btn.primary{ background:var(--copper); color:var(--bg-deep); font-weight:600; }
+  .btn.primary:hover{ background:var(--copper-bright); border-color:var(--copper-bright); }
+  .btn.ghost{ color:var(--copper-bright); }
+  .btn.ghost:hover{ background:var(--bg-panel); }
+
+  /* ===== section shell ===== */
+  section{ padding:56px 0; border-top:1px solid var(--line); }
+  .section-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:28px; }
+  .section-head .idx{ font-family:'IBM Plex Mono'; color:var(--muted); font-size:0.85rem; }
+  .section-head h2{ font-size:1.5rem; }
+
+  /* ===== about ===== */
+  .about-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:40px; }
+  @media(max-width:700px){ .about-grid{ grid-template-columns:1fr; } }
+  .field{ margin-bottom:16px; }
+  .field .label{ font-family:'IBM Plex Mono'; font-size:0.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; }
+  .field .value{ margin-top:4px; }
+
+  /* ===== pinout / skills ===== */
+  .pinout{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px; }
+  .pin{
+    background:var(--bg-panel); border:1px solid var(--line);
+    border-radius:var(--radius); padding:16px 18px;
+    position:relative;
+  }
+  .pin::before{
+    content:''; position:absolute; left:-1px; top:16px; bottom:16px; width:3px;
+    background:var(--copper);
+  }
+  .pin .pin-name{ font-family:'Space Grotesk'; font-weight:600; font-size:0.98rem; margin-bottom:6px; }
+  .pin .pin-list{ font-family:'IBM Plex Mono'; font-size:0.78rem; color:var(--silk-dim); }
+
+  /* ===== timeline / experience ===== */
+  .timeline{ display:flex; flex-direction:column; gap:26px; }
+  .tl-item{ display:grid; grid-template-columns:150px 1fr; gap:20px; }
+  @media(max-width:600px){ .tl-item{ grid-template-columns:1fr; } }
+  .tl-date{ font-family:'IBM Plex Mono'; font-size:0.78rem; color:var(--copper-bright); }
+  .tl-role{ font-family:'Space Grotesk'; font-weight:600; font-size:1.05rem; }
+  .tl-org{ color:var(--silk-dim); font-size:0.92rem; margin-bottom:6px; }
+  .tl-desc{ color:var(--silk-dim); font-size:0.95rem; }
+
+  /* ===== projects ===== */
+  .projects{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; }
+  .card{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px; display:flex; flex-direction:column; gap:10px;
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .card:hover{ transform:translateY(-3px); border-color:var(--copper); box-shadow:0 8px 24px rgba(0,0,0,0.25); }
+  .card .tag{ font-family:'IBM Plex Mono'; font-size:0.68rem; color:var(--bg-deep); background:var(--copper-bright); display:inline-block; padding:2px 8px; border-radius:20px; margin-right:6px; margin-top:4px; }
+  .card h3{ font-size:1.05rem; }
+  .card p{ color:var(--silk-dim); font-size:0.92rem; }
+  .card a.repo{ font-family:'IBM Plex Mono'; font-size:0.8rem; margin-top:auto; }
+
+  /* ===== certifications ===== */
+  .cert-list{ list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .cert-list li{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 18px; background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius);
+  }
+  .cert-list .cname{ font-weight:500; }
+  .cert-list .cissuer{ font-family:'IBM Plex Mono'; font-size:0.78rem; color:var(--muted); }
+
+  /* ===== contact / footer ===== */
+  footer{ padding:60px 0 80px; border-top:1px solid var(--line); }
+  .contact-grid{ display:flex; flex-wrap:wrap; gap:14px; margin-top:24px; }
+  .contact-grid a{
+    font-family:'IBM Plex Mono'; font-size:0.85rem;
+    border:1px solid var(--line); padding:10px 16px; border-radius:var(--radius);
+    text-decoration:none; color:var(--silk-dim);
+  }
+  .contact-grid a:hover{ border-color:var(--copper-bright); color:var(--copper-bright); }
+  .foot-note{ margin-top:40px; font-family:'IBM Plex Mono'; font-size:0.72rem; color:var(--muted); }
+
+  /* reveal on scroll */
+  .reveal{ opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .reveal, .trace-line{ transition:none !important; opacity:1 !important; transform:none !important; stroke-dashoffset:0 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <div class="mark">AERON<span>.</span>FLORES</div>
+    <nav>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="sheet">
+  <div class="trace-rail" id="traceRail">
+    <svg width="40" height="2600" viewBox="0 0 40 2600">
+      <path class="trace-line" id="traceLine" d="M 20 0 L 20 260 L 8 280 L 8 520 L 20 540 L 20 900 L 8 920 L 8 1300 L 20 1320 L 20 1750 L 8 1770 L 8 2100 L 20 2120 L 20 2600"/>
+      <circle class="pad" cx="20" cy="260" r="5"/>
+      <circle class="pad" cx="8" cy="520" r="5"/>
+      <circle class="pad" cx="20" cy="900" r="5"/>
+      <circle class="pad" cx="8" cy="1300" r="5"/>
+      <circle class="pad" cx="20" cy="1750" r="5"/>
+      <circle class="pad" cx="8" cy="2100" r="5"/>
+    </svg>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" style="border-top:none; padding-top:56px;">
+    <div class="part-no">PART NO. AF&#8209;2026&#8209;SWE &nbsp;•&nbsp; REV. 2026.07</div>
+    <h1>Aeron Flores <br><em>builds systems,</em> not just software.</h1>
+    <p class="role">Software Engineer — Backend, AI/ML, Embedded Systems</p>
+    <p class="lede">Computer Science graduate from San Diego State University with hands-on experience across backend APIs, machine learning pipelines, and embedded hardware. Based in the San Diego area, currently looking for full-time engineering roles.</p>
+    <div class="hero-cta">
+      <a class="btn primary" href="#contact">Get in touch</a>
+      <a class="btn ghost" href="#" id="resumeLink">Download resume (PDF)</a>
+      <a class="btn ghost" href="https://github.com/aeron72" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-head"><span class="idx">01</span><h2>About</h2></div>
+    <div class="about-grid reveal">
+      <div>
+        <p>I graduated from San Diego State University with a B.S. in Computer Science (Dean's List, 3.49 GPA). I like working across the stack of a problem — from the hardware sensor reading in the field, to the API serving the data, to the model making sense of it.</p>
+        <p style="margin-top:14px;">Most recently that's meant building ML pipelines on business survey data, writing REST APIs in both Java and Go, and getting an autonomous underwater vehicle to talk to its own sensors. I'm currently working at ACE Parking in a customer-facing supervisor role while I job search — it's taught me a lot about staying calm and clear under pressure, which turns out to translate well to debugging production issues.</p>
+      </div>
+      <div>
+        <div class="field">
+          <div class="label">Location</div>
+          <div class="value">San Diego area, CA — open to in-person, no relocation</div>
+        </div>
+        <div class="field">
+          <div class="label">Education</div>
+          <div class="value">B.S. Computer Science, San Diego State University</div>
+        </div>
+        <div class="field">
+          <div class="label">Languages</div>
+          <div class="value">English, Tagalog</div>
+        </div>
+        <div class="field">
+          <div class="label">Looking for</div>
+          <div class="value">Software Engineering · AI/ML · IT Support</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS / PINOUT -->
+  <section id="skills">
+    <div class="section-head"><span class="idx">02</span><h2>Skills</h2></div>
+    <div class="pinout reveal">
+      <div class="pin">
+        <div class="pin-name">Languages</div>
+        <div class="pin-list">Java · Python · Go · JavaScript · SQL</div>
+      </div>
+      <div class="pin">
+        <div class="pin-name">Backend</div>
+        <div class="pin-list">Spring Boot · REST APIs · Gorilla Mux</div>
+      </div>
+      <div class="pin">
+        <div class="pin-name">Data / ML</div>
+        <div class="pin-list">pandas · scikit-learn · ML pipelines</div>
+      </div>
+      <div class="pin">
+        <div class="pin-name">Frontend</div>
+        <div class="pin-list">React · JavaScript</div>
+      </div>
+      <div class="pin">
+        <div class="pin-name">Embedded / IoT</div>
+        <div class="pin-list">ESP32 · Sensor integration · AUV systems</div>
+      </div>
+      <div class="pin">
+        <div class="pin-name">Tools</div>
+        <div class="pin-list">Git · Zerve · Claude Code</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="section-head"><span class="idx">03</span><h2>Experience</h2></div>
+    <div class="timeline reveal">
+      <div class="tl-item">
+        <div class="tl-date">Current</div>
+        <div>
+          <div class="tl-role">Supervisor / Cashier</div>
+          <div class="tl-org">ACE Parking</div>
+          <div class="tl-desc">Customer-facing supervisor role managing daily operations and staff coordination while pursuing full-time engineering roles.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">SDSU</div>
+        <div>
+          <div class="tl-role">Research Assistant</div>
+          <div class="tl-org">AI4BUSINESS Lab, San Diego State University</div>
+          <div class="tl-desc">Built machine learning pipelines to analyze business survey data — from data cleaning and feature engineering through model evaluation.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">SDSU</div>
+        <div>
+          <div class="tl-role">Member</div>
+          <div class="tl-org">SDSU Mechatronics Club</div>
+          <div class="tl-desc">Contributed to an autonomous underwater vehicle (AUV) project, working on embedded systems and IoT sensor integration for navigation and data collection.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-head"><span class="idx">04</span><h2>Projects</h2></div>
+    <div class="projects reveal">
+      <div class="card">
+        <h3>AUV Embedded Systems</h3>
+        <p>Programmed embedded systems for an autonomous underwater vehicle, working with ESP32 microcontrollers and sensor integration for navigation and data collection.</p>
+        <div><span class="tag">ESP32</span><span class="tag">C/C++</span><span class="tag">IoT</span></div>
+        <a class="repo" href="https://github.com/aeron72" target="_blank" rel="noopener">View on GitHub ↗</a>
+      </div>
+      <div class="card">
+        <h3>ML Pipeline — Business Survey Analysis</h3>
+        <p>Built machine learning pipelines to analyze business survey data at SDSU's AI4BUSINESS Lab, covering data cleaning, feature engineering, and model evaluation.</p>
+        <div><span class="tag">Python</span><span class="tag">pandas</span><span class="tag">scikit-learn</span></div>
+        <a class="repo" href="https://github.com/aeron72" target="_blank" rel="noopener">View on GitHub ↗</a>
+      </div>
+      <div class="card">
+        <h3>Tech Job Market Analysis</h3>
+        <p>Analyzed public salary datasets to surface trends in the tech job market using the Zerve data science platform for exploration and visualization.</p>
+        <div><span class="tag">Python</span><span class="tag">Zerve</span><span class="tag">Data Viz</span></div>
+        <a class="repo" href="#" target="_blank" rel="noopener">View project ↗</a>
+      </div>
+      <div class="card">
+        <h3>REST API in Go</h3>
+        <p>Built a REST API from scratch in Go using the Gorilla Mux router, applying backend concepts from a Java/Spring Boot background to a new language.</p>
+        <div><span class="tag">Go</span><span class="tag">Gorilla Mux</span><span class="tag">REST</span></div>
+        <a class="repo" href="https://github.com/aeron72" target="_blank" rel="noopener">View on GitHub ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CERTIFICATIONS -->
+  <section id="certifications">
+    <div class="section-head"><span class="idx">05</span><h2>Certifications</h2></div>
+    <ul class="cert-list reveal">
+      <li>
+        <span class="cname">AI Fundamentals</span>
+        <span class="cissuer">DataCamp — <a href="https://www.datacamp.com/skill-verification/AIF0027676228986" target="_blank" rel="noopener">verify ↗</a></span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- CONTACT -->
+  <footer id="contact">
+    <div class="section-head"><span class="idx">06</span><h2>Contact</h2></div>
+    <p class="reveal" style="max-width:520px; color:var(--silk-dim);">Looking for a software engineer who can move between hardware, backend, and data? I'd like to hear from you.</p>
+    <div class="contact-grid reveal">
+      <a href="mailto:your-email@example.com">Email</a>
+      <a href="https://www.linkedin.com/in/aeron-flores-005476278" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a href="https://github.com/aeron72" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="https://www.youtube.com/channel/UCCJreEikcatwDoquKuYTKrg" target="_blank" rel="noopener">YouTube ↗</a>
+    </div>
+    <div class="foot-note">© 2026 Aeron Flores — built by hand, not a template.</div>
+  </footer>
+</div>
+
+<script>
+  // draw trace line once on load
+  window.addEventListener('load', () => {
+    document.getElementById('traceLine').classList.add('drawn');
+  });
+
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
